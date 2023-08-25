@@ -1,29 +1,27 @@
 version: '3'
 services:
-  
   backend:
     build:
-      context: .
+      context: . 
+        # image : Two_tier_flask_app_backend
+
     ports:
-      - "5000:5000"
+      - 5000:5000
     environment:
       MYSQL_HOST: mysql
-      MYSQL_USER: your_username
-      MYSQL_PASSWORD: your_password
-      MYSQL_DB: your_database
+      MYSQL_USER: DevOps
+      MYSQL_PASSWORD: test@123
+      MYSQL_DB: two_tier_database
     depends_on:
       - mysql
-
   mysql:
     image: mysql:5.7
-    environment:
-      MYSQL_ROOT_PASSWORD: your_root_password
-      MYSQL_DATABASE: your_database
-      MYSQL_USER: your_username
-      MYSQL_PASSWORD: your_password
+    environment:                  # MYSQL environment variables
+      MYSQL_ROOT_PASSWORD: test@123
+      MYSQL_USER: DevOps
+      MYSQL_DATABASE: two_tier_database
+      MYSQL_PASSWORD: test@123
     volumes:
-      - ./message.sql:/docker-entrypoint-initdb.d/message.sql   # Mount sql script into container's /docker-entrypoint-initdb.d directory
-      - mysql-data:/var/lib/mysql  # Mount the volume for MySQL data storage
-
+      - my-datavolume:/var/lib/mysql
 volumes:
-  mysql-data:
+  my-datavolume:
