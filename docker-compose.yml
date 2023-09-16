@@ -1,27 +1,33 @@
 version: '3'
 services:
+
   backend:
     build:
-      context: . 
-        # image : Two_tier_flask_app_backend
+      context: .
 
     ports:
       - 5000:5000
+
     environment:
       MYSQL_HOST: mysql
       MYSQL_USER: DevOps
       MYSQL_PASSWORD: test@123
-      MYSQL_DB: two_tier_database
+      MYSQL_DB: two_tier_app_database
+
     depends_on:
       - mysql
+
   mysql:
     image: mysql:5.7
-    environment:                  # MYSQL environment variables
+
+    environment:
       MYSQL_ROOT_PASSWORD: test@123
       MYSQL_USER: DevOps
-      MYSQL_DATABASE: two_tier_database
       MYSQL_PASSWORD: test@123
+      MYSQL_DATABASE: two_tier_app_database
+
     volumes:
       - my-datavolume:/var/lib/mysql
+
 volumes:
   my-datavolume:
