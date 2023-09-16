@@ -15,10 +15,11 @@ mysql = MySQL(app)
 
 # Function to create the messages table by executing the SQL script
 def create_messages_table():
-    print(f"MySQL Host: {app.config['MYSQL_HOST']}")
-    print(f"MySQL User: {app.config['MYSQL_USER']}")
-    print(f"MySQL Password: {app.config['MYSQL_PASSWORD']}")
-    print(f"MySQL DB: {app.config['MYSQL_DB']}")
+    print("MySQL Configuration:")
+    print(f"  Host: {app.config['MYSQL_HOST']}")
+    print(f"  User: {app.config['MYSQL_USER']}")
+    print(f"  Password: {app.config['MYSQL_PASSWORD']}")
+    print(f"  DB: {app.config['MYSQL_DB']}")
 
     if mysql.connection is None:
         print("MySQL connection is None")
@@ -26,10 +27,12 @@ def create_messages_table():
 
     script_path = 'message.sql'  # Path to the SQL script
     with open(script_path, 'r') as sql_file:
-        cur = mysql.connection.cursor()
-        cur.execute(sql_file.read())
-        mysql.connection.commit()
-        cur.close()
+        sql_script = sql_file.read()
+
+    cur = mysql.connection.cursor()
+    cur.execute(sql_script)
+    mysql.connection.commit()
+    cur.close()
 
 @app.route('/')
 def hello():
@@ -49,5 +52,8 @@ def submit():
     return redirect(url_for('hello'))
 
 if __name__ == '__main__':
-    create_messages_table()  # Create the messages table
+    # Create the messages table
+    create_messages_table()
+
+    # Run the Flask application
     app.run(host='0.0.0.0', port=5000, debug=True)
