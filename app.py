@@ -13,17 +13,14 @@ app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'default_db')
 # Initialize MySQL
 mysql = MySQL(app)
 
-# Function to create the messages table if it doesn't exist
+# Function to create the messages table by executing the SQL script
 def create_messages_table():
-    cur = mysql.connection.cursor()
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            message TEXT
-        )
-    ''')
-    mysql.connection.commit()
-    cur.close()
+    script_path = 'message.sql'  # Path to the SQL script
+    with open(script_path, 'r') as sql_file:
+        cur = mysql.connection.cursor()
+        cur.execute(sql_file.read())
+        mysql.connection.commit()
+        cur.close()
 
 @app.route('/')
 def hello():
