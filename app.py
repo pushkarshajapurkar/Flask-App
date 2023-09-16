@@ -15,50 +15,61 @@ mysql = MySQL(app)
 
 # Function to create the messages table if it doesn't exist
 def create_messages_table():
-    conn = mysql.connection
-    cursor = conn.cursor()
+    try:
+        conn = mysql.connection
 
-    # Create the database if it doesn't exist
-    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {app.config['MYSQL_DB']}")
-    cursor.execute(f"USE {app.config['MYSQL_DB']}")
+        if conn is None:
+            raise Exception("MySQL connection is None")
 
-    # Check if the table exists
-    cursor.execute("SHOW TABLES LIKE 'messages'")
-    result = cursor.fetchone()
+        cursor = conn.cursor()
 
-    if not result:
-        # Table doesn't exist, create it
-        cursor.execute('''
-            CREATE TABLE messages (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                message TEXT
-            )
-        ''')
-        print("Table 'messages' created.")
+        # Create the database if it doesn't exist
+        cursor.execute(f"CREATE DATABASE IF NOT EXISTS {app.config['MYSQL_DB']}")
+        cursor.execute(f"USE {app.config['MYSQL_DB']}")
 
-    cursor.close()
+        # Check if the table exists
+        cursor.execute("SHOW TABLES LIKE 'messages'")
+        result = cursor.fetchone()
+
+        if not result:
+            # Table doesn't exist, create it
+            cursor.execute('''
+                CREATE TABLE messages (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    message TEXT
+                )
+            ''')
+            print("Table 'messages' created.")
+    except Exception as e:
+        print("An error occurred during database and table creation:", str(e))
+    finally:
+        if cursor:
+            cursor.close()
 
 @app.route('/')
 def hello():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT message FROM messages')
-    messages = cur.fetchall()
-    cur.close()
-    return render_template('index.html', messages=messages)
+    try:
+        create_messages_table()  # Create the messages table
+
+        cur = mysql.connection.cursor()
+        cur.execute('SELECT message FROM messages')
+        messages = cur.fetchall()
+        cur.close()
+        return render_template('index.html', messages=messages)
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
 @app.route('/submit', methods=['POST'])
 def submit():
-    new_message = request.form.get('new_message')
-    cur = mysql.connection.cursor()
-    cur.execute('INSERT INTO messages (message) VALUES (%s)', [new_message])
-    mysql.connection.commit()
-    cur.close()
-    return redirect(url_for('hello'))
+    try:
+        new_message = request.form.get('new_message')
+        cur = mysql.connection.cursor()
+        cur.execute('INSERT INTO messages (message) VALUES (%s)', [new_message])
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('hello'))
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
-# Create the database and table, then run the Flask application
 if __name__ == '__main__':
-    # Create the database and table
-    create_messages_table()
-
-    # Run the Flask application
     app.run(host='0.0.0.0', port=5000, debug=True)
