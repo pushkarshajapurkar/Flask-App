@@ -4,7 +4,7 @@ from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
-# Configure MySQL from environment variables
+# Configure MySQL from environment variables or use defaults
 app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
 app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'default_user')
 app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'default_password')
@@ -13,26 +13,30 @@ app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'default_db')
 # Initialize MySQL
 mysql = MySQL(app)
 
-# Function to create the messages table by executing the SQL script
+# Function to create the messages table if it doesn't exist
 def create_messages_table():
-    print("MySQL Configuration:")
-    print(f"  Host: {app.config['MYSQL_HOST']}")
-    print(f"  User: {app.config['MYSQL_USER']}")
-    print(f"  Password: {app.config['MYSQL_PASSWORD']}")
-    print(f"  DB: {app.config['MYSQL_DB']}")
+    conn = mysql.connection
+    cursor = conn.cursor()
 
-    if mysql.connection is None:
-        print("MySQL connection is None")
-        return
+    # Create the database if it doesn't exist
+    cursor.execute(f"CREATE DATABASE IF NOT EXISTS {app.config['MYSQL_DB']}")
+    cursor.execute(f"USE {app.config['MYSQL_DB']}")
 
-    script_path = 'message.sql'  # Path to the SQL script
-    with open(script_path, 'r') as sql_file:
-        sql_script = sql_file.read()
+    # Check if the table exists
+    cursor.execute("SHOW TABLES LIKE 'messages'")
+    result = cursor.fetchone()
 
-    cur = mysql.connection.cursor()
-    cur.execute(sql_script)
-    mysql.connection.commit()
-    cur.close()
+    if not result:
+        # Table doesn't exist, create it
+        cursor.execute('''
+            CREATE TABLE messages (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                message TEXT
+            )
+        ''')
+        print("Table 'messages' created.")
+
+    cursor.close()
 
 @app.route('/')
 def hello():
@@ -51,8 +55,9 @@ def submit():
     cur.close()
     return redirect(url_for('hello'))
 
+# Create the database and table, then run the Flask application
 if __name__ == '__main__':
-    # Create the messages table
+    # Create the database and table
     create_messages_table()
 
     # Run the Flask application
