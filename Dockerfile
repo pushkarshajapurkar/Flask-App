@@ -11,7 +11,7 @@ COPY . .
 
 RUN pip install --upgrade pip \
     && pip install mysqlclient \
-    && pip install -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
 
