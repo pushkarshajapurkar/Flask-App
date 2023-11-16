@@ -43,7 +43,7 @@ def create_messages_table():
     except Exception as e:
         print("An error occurred during database and table creation:", str(e))
     finally:
-        if cursor:
+        if 'cursor' in locals():
             cursor.close()
 
 @app.route('/')
@@ -51,10 +51,16 @@ def hello():
     try:
         create_messages_table()  # Create the messages table
 
-        cur = mysql.connection.cursor()
-        cur.execute('SELECT message FROM messages')
-        messages = cur.fetchall()
-        cur.close()
+        cur = None  # Initialize cur to None
+
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute('SELECT message FROM messages')
+            messages = cur.fetchall()
+        finally:
+            if cur:
+                cur.close()
+
         return render_template('index.html', messages=messages)
     except Exception as e:
         return f"An error occurred: {str(e)}"
