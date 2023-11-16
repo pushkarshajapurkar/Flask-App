@@ -1,30 +1,27 @@
 version: '3'
 services:
-
   backend:
     build:
       context: .
-
     ports:
       - 5000:5000
-
     environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: DevOps
-      MYSQL_PASSWORD: test@123
-      MYSQL_DB: two_tier_app_database
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DB: ${MYSQL_DB}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     depends_on:
       - mysql
 
   mysql:
-    image: mysql:5.7
-
+    image: mysql:latest
     environment:
-      MYSQL_ROOT_PASSWORD: test@123
-      MYSQL_USER: DevOps
-      MYSQL_PASSWORD: test@123
-      MYSQL_DATABASE: two_tier_app_database
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
 
     volumes:
       - my-datavolume:/var/lib/mysql
