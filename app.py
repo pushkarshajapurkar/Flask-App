@@ -68,7 +68,8 @@ def hello():
 @app.route('/submit', methods=['POST'])
 def submit():
     try:
-        new_message = request.form.get('new_message')
+        data = request.get_json()
+        new_message = data.get('new_message')
         cur = mysql.connection.cursor()
         cur.execute('INSERT INTO messages (message) VALUES (%s)', [new_message])
         mysql.connection.commit()
