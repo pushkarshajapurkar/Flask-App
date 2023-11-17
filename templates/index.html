@@ -114,12 +114,12 @@
             const newMessageInput = document.getElementById('newMessage');
             const newMessage = newMessageInput.value;
 
-            fetch('/api/submit', {
+            fetch('/submit', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/json',
                 },
-                body: `new_message=${encodeURIComponent(newMessage)}`,
+                body: JSON.stringify({ new_message: newMessage }),
             })
             .then(response => response.json())
             .then(data => {
